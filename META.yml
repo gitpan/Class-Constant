@@ -1,0 +1,18 @@
+---
+name: Class-Constant
+version: 0.01
+author:
+  - 'Robert Norris <Robert.Norris@its.monash.edu.au>'
+abstract: Build constant classes
+license: perl
+build_requires:
+  Scalar::Util: 0
+  Test::More: 0
+provides:
+  Class::Constant:
+    file: lib/Class/Constant.pm
+    version: 0.01
+  Class::Constant::Value:
+    file: lib/Class/Constant.pm
+    version: 0.01
+generated_by: Module::Build version 0.26
