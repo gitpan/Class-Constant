@@ -1,5 +1,8 @@
 Revision history for Class-Constant
 
-0.01    Date/time
+0.01    4 August 2006
         First version.
 
+0.02    XXX
+        - Support for constant methods.
+        - Make the calling class subclass ::Value
