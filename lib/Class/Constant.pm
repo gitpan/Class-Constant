@@ -3,7 +3,7 @@ package Class::Constant;
 use warnings;
 use strict;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 my %ordinal_for_data;
 my %data_by_ordinal;
@@ -33,7 +33,7 @@ sub import {
             $data{ordinal} = $ordinal_for_data{$caller};
             $ordinal_for_data{$caller}++;
 
-            $data{object} = bless \do { my $x = $data{ordinal} }, $caller;
+            $data{object} = \do { my $x = $data{ordinal} };
 
             $data{value} = $value;
             $value++;
@@ -62,7 +62,7 @@ sub import {
 
         do {
             no strict "refs";
-            *{$caller."::".$data->{name}} = sub { $data->{object} };
+            *{$caller."::".$data->{name}} = sub { bless $data->{object}, $caller };
         };
     }
 
@@ -74,7 +74,7 @@ sub import {
 
             *{$caller."::by_ordinal"} = sub {
                 return if @_ < 2;
-                return $data_by_ordinal{$caller}->[$_[1]]->{object};
+                return bless $data_by_ordinal{$caller}->[$_[1]]->{object}, $caller;
             };
         };
     }

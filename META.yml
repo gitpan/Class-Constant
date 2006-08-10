@@ -1,6 +1,6 @@
 ---
 name: Class-Constant
-version: 0.02
+version: 0.03
 author:
   - 'Robert Norris <Robert.Norris@its.monash.edu.au>'
 abstract: Build constant classes
@@ -11,8 +11,8 @@ build_requires:
 provides:
   Class::Constant:
     file: lib/Class/Constant.pm
-    version: 0.02
+    version: 0.03
   Class::Constant::Value:
     file: lib/Class/Constant.pm
-    version: 0.02
+    version: 0.03
 generated_by: Module::Build version 0.26
