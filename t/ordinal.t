@@ -17,3 +17,9 @@ ok(__PACKAGE__->by_ordinal(2) == TWO);
 ok(__PACKAGE__->by_ordinal(3) == THREE);
 ok(__PACKAGE__->by_ordinal(4) == FOUR);
 ok(__PACKAGE__->by_ordinal(5) == FIVE);
+
+eval {
+    __PACKAGE__->by_ordinal(6);
+};
+my $err = $@;
+ok($err =~ /Can't locate constant with ordinal/);

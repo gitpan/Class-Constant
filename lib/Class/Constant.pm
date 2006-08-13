@@ -3,7 +3,7 @@ package Class::Constant;
 use warnings;
 use strict;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 my %ordinal_for_data;
 my %data_by_ordinal;
@@ -20,7 +20,7 @@ sub import {
     my %data;
     my $value = 0;
     for my $arg (@args) {
-        if ($arg =~ /^[A-Z-_]+$/) {
+        if ($arg =~ /^[A-Z][A-Z0-9_]*$/) {
             if (exists $data{name}) {
                 my %data_copy = %data;
                 $data_by_ordinal{$caller}->[$data{ordinal}] = \%data_copy;
@@ -74,6 +74,10 @@ sub import {
 
             *{$caller."::by_ordinal"} = sub {
                 return if @_ < 2;
+                if (not exists $data_by_ordinal{$caller}->[$_[1]]) {
+                    require Carp;
+                    Carp::croak("Can't locate constant with ordinal \"$_[1]\" in package \"".(ref($_[0])||$_[0])."\"");
+                }
                 return bless $data_by_ordinal{$caller}->[$_[1]]->{object}, $caller;
             };
         };
@@ -86,15 +90,17 @@ package Class::Constant::Value;
 use Scalar::Util qw(refaddr);
 
 use overload
-    q{""} => sub {
-        return "$data_by_ordinal{ref $_[0]}->[${$_[0]}]->{value}";
-    },
-    q{==} => sub {
-        return ref $_[0] and ref $_[1] and refaddr $_[0] == refaddr $_[1] ? 1 : 0;
-    },
-    q{!=} => sub {
-        return ref $_[0] and ref $_[1] and refaddr $_[0] == refaddr $_[1] ? 0 : 1;
-    };
+    q{""} => sub { (shift)->as_string(@_) },
+    q{==} => sub { (shift)->equals(@_) },
+    q{!=} => sub { !(shift)->equals(@_) };
+
+sub as_string {
+    return "$data_by_ordinal{ref $_[0]}->[${$_[0]}]->{value}";
+}
+
+sub equals {
+    return (ref $_[0] eq ref $_[1] && refaddr $_[0] == refaddr $_[1]) ? 1 : 0;
+}
 
 sub get_ordinal {
     return ${$_[0]};
@@ -112,8 +118,8 @@ sub AUTOLOAD {
     return if not $data;
 
     if (not exists $data->{methods} or not exists $data->{methods}->{$method}) {
-        use Carp qw(croak);
-        croak "Can't locate named constant \"$method\" for \"" .ref($_[0]). "::$data->{name}\"";
+        require Carp;
+        Carp::croak("Can't locate named constant \"$method\" for \"" .ref($_[0]). "::$data->{name}\"");
     }
 
     return $data->{methods}->{$method};
