@@ -3,7 +3,7 @@ package Class::Constant;
 use warnings;
 use strict;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 my %ordinal_for_data;
 my %data_by_ordinal;
@@ -88,19 +88,25 @@ sub import {
 package
     Class::Constant::Object;
 
-use Scalar::Util qw(refaddr);
+use Scalar::Util qw(refaddr blessed);
 
 use overload
     q{""} => sub { (shift)->as_string(@_) },
-    q{==} => sub { (shift)->equals(@_) },
-    q{!=} => sub { !(shift)->equals(@_) };
+    q{==} => sub { !!((shift)->equals(@_)) },
+    q{!=} => sub { !((shift)->equals(@_)) },
+    q{eq} => sub { !!((shift)->equals(@_)) },
+    q{ne} => sub { !((shift)->equals(@_)) };
 
 sub as_string {
     return "$data_by_ordinal{ref $_[0]}->[${$_[0]}]->{value}";
 }
 
 sub equals {
-    return (ref $_[0] eq ref $_[1] && refaddr $_[0] == refaddr $_[1]) ? 1 : 0;
+    if (blessed $_[1] and $_[1]->isa(__PACKAGE__)) {
+        return (refaddr $_[0] == refaddr $_[1]) ? 1 : 0;
+    }
+
+    return "".$_[0] eq "".$_[1];
 }
 
 sub get_ordinal {
@@ -333,9 +339,9 @@ probably not defined; check your declarations.
 
 =head1 AUTHOR
 
-Robert Norris (rob@cataclysm.cx)
+Robert Norris E<lt>rob@eatenbyagrue.orgE<gt>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2006 Robert Norris. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself.
+Copyright (c) 2006-2010 Robert Norris. This program is free software; you can
+redistribute it and/or modify it under the terms of the Artistic License v2.
